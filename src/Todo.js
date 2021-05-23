@@ -21,107 +21,142 @@ import CardContent from '@material-ui/core/CardContent';
 import db from './firebase';
 import './Todo.css';
 
-const useStyles = makeStyles((theme) => ({
-    button: {
-        margin: theme.spacing(1),
-    },
-    modal: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    paper: {
-        backgroundColor: theme.palette.background.paper,
-        border: 'none',
-        padding: theme.spacing(2, 4, 3),
-        display: 'flex'
-    },
+const useStyles = makeStyles((theme, status) => ({
+	button: {
+		margin: theme.spacing(1),
+	},
+	modal: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	paper: {
+		backgroundColor: theme.palette.background.paper,
+		border: 'none',
+		padding: theme.spacing(2, 4, 3),
+		display: 'flex',
+	},
+	new: {
+		borderTop: '4px solid green',
+		padding: 0,
+		'&:hover': {
+			backgroundColor: '#f5f5f5',
+		},
+	},
+	edited: {
+		borderTop: '4px solid orange',
+		'&:hover': {
+			backgroundColor: '#f5f5f5',
+		},
+	},
+	list: {
+		width: '10rem',
+	},
 }));
 
 function Todo({ task }) {
-    const classes = useStyles();
-    const [open, setOpen] = useState(false);
-    const [editData, setData] = useState('');
+	const classes = useStyles();
+	const [open, setOpen] = useState(false);
+	const [editData, setData] = useState('');
 
-    useEffect(() => {
-        setData(task.todos)
-    }, [task.todos]);
+	useEffect(() => {
+		setData(task.todos);
+	}, [task.todos]);
 
-    const handleOpen = () => {
-        setOpen(true);
-    };
+	const handleOpen = () => {
+		setOpen(true);
+	};
 
-    const handleClose = () => {
-        setOpen(false);
-    };
+	const handleClose = () => {
+		setOpen(false);
+	};
 
-    const updateTodo = () => {
-        db.collection('todos').doc(task.id).set({
-            todos: editData,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true })
-        setOpen(false)
-    }
-    return (
-        <List className="todo__list">
-            <Modal
-                aria-labelledby="transition-modal-title"
-                aria-describedby="transition-modal-description"
-                className={classes.modal}
-                open={open}
-                onClose={handleClose}
-                closeAfterTransition
-                BackdropComponent={Backdrop}
-                BackdropProps={{
-                    timeout: 500,
-                }}
-            >
-                <Fade in={open}>
-                    <Paper elevation={3} className={classes.paper}>
-                        <TextField
-                            id={task.id}
-                            label="Edit Todo"
-                            style={{ margin: 8 }}
-                            placeholder={task.todos}
-                            value={editData}
-                            onChange={(e) => setData(e.target.value)}
-                            margin="normal"
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                        />
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            type="submit"
-                            className={classes.button}
-                            onClick={updateTodo}
-                        >
-                            Save
-                        </Button>
-                    </Paper>
-                </Fade>
-            </Modal>
-            <Card className={classes.root} variant="outlined">
-                <CardContent>
-                    <ListItem >
-                        <ListItemAvatar>
-                            <Avatar>
-                                <PlaylistAddCheckIcon />
-                            </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText primary={task.todos} secondary={"Todo.."} />
-                        <IconButton aria-label="delete" onClick={() => db.collection('todos').doc(task.id).delete()} >
-                            <DeleteIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton aria-label="delete" onClick={handleOpen} >
-                            <EditIcon fontSize="small" />
-                        </IconButton>
-                    </ListItem>
-                </CardContent>
-            </Card>
-        </List>
-    )
+	const updateTodo = () => {
+		db.collection('todos').doc(task.id).set(
+			{
+				todos: editData,
+				timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+				actionType: 'update',
+			},
+			{ merge: true },
+		);
+		setOpen(false);
+	};
+	return (
+		<List className='todo__list'>
+			<Modal
+				aria-labelledby='transition-modal-title'
+				aria-describedby='transition-modal-description'
+				className={classes.modal}
+				open={open}
+				onClose={handleClose}
+				closeAfterTransition
+				BackdropComponent={Backdrop}
+				BackdropProps={{
+					timeout: 500,
+				}}
+			>
+				<Fade in={open}>
+					<Paper elevation={3} className={classes.paper}>
+						<TextField
+							id={task.id}
+							label='Edit Todo'
+							style={{ margin: 8 }}
+							placeholder={task.todos}
+							value={editData}
+							onChange={(e) => setData(e.target.value)}
+							margin='normal'
+							InputLabelProps={{
+								shrink: true,
+							}}
+						/>
+						<Button
+							variant='contained'
+							color='primary'
+							type='submit'
+							className={classes.button}
+							onClick={updateTodo}
+						>
+							Save
+						</Button>
+					</Paper>
+				</Fade>
+			</Modal>
+			<Card
+				className={task.actionType === 'create' ? classes.new : classes.edited}
+				variant='outlined'
+			>
+				<CardContent>
+					<p className='timestamp'>{task.date}</p>
+					<ListItem>
+						<ListItemAvatar>
+							<Avatar>
+								<PlaylistAddCheckIcon />
+							</Avatar>
+						</ListItemAvatar>
+						<ListItemText
+							className={classes.list}
+							primary={task.todos}
+							secondary={'Todo..'}
+						/>
+						<IconButton
+							aria-label='delete'
+							onClick={() => db.collection('todos').doc(task.id).delete()}
+						>
+							<DeleteIcon fontSize='small' />
+						</IconButton>
+						<IconButton aria-label='delete' onClick={handleOpen}>
+							<EditIcon fontSize='small' />
+						</IconButton>
+					</ListItem>
+					<p className='timestamp'>
+						{task.actionType === 'create' ? '' : 'Edited. '}
+						{task.timestamp}
+					</p>
+				</CardContent>
+			</Card>
+		</List>
+	);
 }
 
-export default Todo
+export default Todo;

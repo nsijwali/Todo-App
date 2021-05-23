@@ -1,4 +1,19 @@
 .todo__list {
-    align-items: center;
-    width: fit-content;
+	align-items: center;
+	width: fit-content;
+}
+
+.MuiCardContent-root {
+	padding: 0 !important;
+}
+.timestamp {
+	font-size: 12px;
+	text-align: right;
+	color: rgba(0, 0, 0, 0.54);
+	padding: 0 2rem;
+}
+
+.MuiListItem-root {
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
 }
