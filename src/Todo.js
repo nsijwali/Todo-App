@@ -18,6 +18,7 @@ import firebase from 'firebase';
 import TextField from '@material-ui/core/TextField';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
+import FormControl from '@material-ui/core/FormControl';
 import db from './firebase';
 import './Todo.css';
 
@@ -71,7 +72,8 @@ function Todo({ task }) {
 		setOpen(false);
 	};
 
-	const updateTodo = () => {
+	const updateTodo = (e) => {
+		e.preventDefault();
 		db.collection('todos').doc(task.id).set(
 			{
 				todos: editData,
@@ -82,6 +84,7 @@ function Todo({ task }) {
 		);
 		setOpen(false);
 	};
+
 	return (
 		<List className='todo__list'>
 			<Modal
@@ -98,27 +101,31 @@ function Todo({ task }) {
 			>
 				<Fade in={open}>
 					<Paper elevation={3} className={classes.paper}>
-						<TextField
-							id={task.id}
-							label='Edit Todo'
-							style={{ margin: 8 }}
-							placeholder={task.todos}
-							value={editData}
-							onChange={(e) => setData(e.target.value)}
-							margin='normal'
-							InputLabelProps={{
-								shrink: true,
-							}}
-						/>
-						<Button
-							variant='contained'
-							color='primary'
-							type='submit'
-							className={classes.button}
-							onClick={updateTodo}
-						>
-							Save
-						</Button>
+						<form className='app__form'>
+							<FormControl>
+								<TextField
+									id={task.id}
+									label='Edit task'
+									style={{ margin: 8 }}
+									placeholder={task.todos}
+									value={editData}
+									onChange={(e) => setData(e.target.value)}
+									margin='normal'
+									InputLabelProps={{
+										shrink: true,
+									}}
+								/>
+							</FormControl>
+							<Button
+								variant='contained'
+								color='primary'
+								type='submit'
+								className={classes.button}
+								onClick={updateTodo}
+							>
+								Save
+							</Button>
+						</form>
 					</Paper>
 				</Fade>
 			</Modal>
